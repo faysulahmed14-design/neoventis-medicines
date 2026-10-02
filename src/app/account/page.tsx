@@ -2,24 +2,49 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useCart } from "@/app/context/CartContext";
+
+interface OrderItem {
+  id: string | number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface OrderRecord {
+  id: string | number;
+  createdAt: string;
+  items: OrderItem[];
+  totalAmount?: number;
+  total?: number;
+}
 
 export default function AccountPage() {
-  const { orders } = useCart();
   const [shippingInfo, setShippingInfo] = useState({
     fullName: "",
     phone: "",
     address: "",
   });
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("neoventis_shipping_info");
-    if (saved) {
+    // Load saved address
+    const savedAddress = localStorage.getItem("neoventis_shipping_info");
+    if (savedAddress) {
       try {
-        setShippingInfo(JSON.parse(saved));
+        setShippingInfo(JSON.parse(savedAddress));
       } catch (e) {
-        console.error("Failed to load shipping info", e);
+        console.error("Failed to parse shipping info", e);
+      }
+    }
+
+    // Load orders directly from localStorage
+    const savedOrders = localStorage.getItem("neoventis_orders");
+    if (savedOrders) {
+      try {
+        setOrders(JSON.parse(savedOrders));
+      } catch (e) {
+        console.error("Failed to parse orders", e);
       }
     }
   }, []);
@@ -42,7 +67,6 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto space-y-8">
-        {/* Header title */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             My Account
@@ -150,12 +174,12 @@ export default function AccountPage() {
                       Order #{order.id}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {new Date(order.createdAt).toLocaleDateString()} • {order.items.length} items
+                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "Recent"} • {order.items?.length || 0} items
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-sm font-bold text-emerald-600">
-                      ৳{order.totalAmount}
+                      ৳{order.totalAmount ?? order.total ?? 0}
                     </span>
                     <Link
                       href={`/tracking?orderId=${order.id}`}
