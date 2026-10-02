@@ -1,81 +1,68 @@
-"use client";
-
 import Link from "next/link";
-import { useCart } from "@/app/context/CartContext";
 
-export default function Header() {
-  const { cart, wishlist } = useCart();
-
-  const totalCartCount = (cart || []).reduce((sum, item) => sum + item.quantity, 0);
-  const totalWishlistCount = (wishlist || []).length;
-
+export default function HomePage() {
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-2">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-1.5 shrink-0">
-            <span className="text-lg sm:text-2xl font-black tracking-tight text-emerald-600 leading-tight">
-              Neoventis <span className="text-gray-900">Medicine</span>
-            </span>
+    <div className="flex flex-col items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
+      {/* Hero Section */}
+      <div className="text-center max-w-3xl mx-auto space-y-5">
+        <span className="inline-block py-1 px-3 rounded-full text-xs font-semibold tracking-wide bg-emerald-100 text-emerald-800">
+          Trusted Online Pharmacy
+        </span>
+
+        <h1 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight leading-tight">
+          Your Trusted Healthcare Partner at Home
+        </h1>
+
+        <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+          Order genuine prescription medicines and healthcare products with fast home delivery across Bangladesh.
+        </p>
+
+        <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+          <Link
+            href="/products"
+            className="rounded-xl bg-emerald-600 px-6 py-3 text-sm sm:text-base font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+          >
+            Shop Medicines
           </Link>
+          <Link
+            href="/account"
+            className="rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm sm:text-base font-bold text-gray-800 shadow-sm hover:bg-gray-50 transition"
+          >
+            My Account
+          </Link>
+        </div>
+      </div>
 
-          {/* Navigation Links - Desktop */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-            <Link href="/" className="hover:text-emerald-600 transition">
-              Home
-            </Link>
-            <Link href="/products" className="hover:text-emerald-600 transition">
-              All Medicines
-            </Link>
-            <Link href="/tracking" className="hover:text-emerald-600 transition">
-              Track Order
-            </Link>
-            <Link href="/account" className="hover:text-emerald-600 transition">
-              My Account
-            </Link>
-          </nav>
+      {/* Featured Section Placeholder */}
+      <div className="mt-16 w-full max-w-5xl">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Featured Medicines</h2>
+            <p className="text-xs text-gray-500">Commonly requested daily medicines and healthcare essentials.</p>
+          </div>
+          <Link href="/products" className="text-xs font-semibold text-emerald-600 hover:underline">
+            View all medicines →
+          </Link>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Wishlist */}
-            <Link
-              href="/wishlist"
-              className="relative p-2 text-gray-700 hover:text-red-500 rounded-lg border border-gray-200 hover:border-red-200 transition"
-              title="Wishlist"
-            >
-              ❤️
-              {totalWishlistCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
-                  {totalWishlistCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Cart */}
-            <Link
-              href="/cart"
-              className="relative p-2 text-gray-700 hover:text-emerald-600 rounded-lg border border-gray-200 hover:border-emerald-200 transition"
-              title="Cart"
-            >
-              🛒
-              {totalCartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white shadow-sm">
-                  {totalCartCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Admin Panel */}
-            <Link
-              href="/admin/products"
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold rounded-lg bg-gray-100 text-gray-800 hover:bg-emerald-600 hover:text-white transition shrink-0"
-            >
-              Admin
-            </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm text-center">
+            <div className="text-3xl mb-2">💊</div>
+            <h3 className="font-bold text-gray-900">Prescription Drugs</h3>
+            <p className="text-xs text-gray-500 mt-1">Verified quality & authentic batches</p>
+          </div>
+          <div className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm text-center">
+            <div className="text-3xl mb-2">🩹</div>
+            <h3 className="font-bold text-gray-900">First Aid & Care</h3>
+            <p className="text-xs text-gray-500 mt-1">Bandages, antiseptics, & daily gear</p>
+          </div>
+          <div className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm text-center">
+            <div className="text-3xl mb-2">⚡</div>
+            <h3 className="font-bold text-gray-900">Rapid Home Delivery</h3>
+            <p className="text-xs text-gray-500 mt-1">Safe and fast delivery directly to your door</p>
           </div>
         </div>
       </div>
-    </header>
+    </div>
   );
 }
