@@ -75,7 +75,8 @@ export default function AccountPage() {
                 value={shippingInfo.fullName}
                 onChange={handleChange}
                 placeholder="e.g. Faysul Ahmed"
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm sm:text-base text-gray-900 placeholder:text-gray-400 bg-white font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
+                style={{ color: "#111827", backgroundColor: "#ffffff" }}
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base !text-gray-900 placeholder:text-gray-400 bg-white font-semibold focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
                 required
               />
             </div>
@@ -90,7 +91,8 @@ export default function AccountPage() {
                 value={shippingInfo.phone}
                 onChange={handleChange}
                 placeholder="01XXXXXXXXX"
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm sm:text-base text-gray-900 placeholder:text-gray-400 bg-white font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
+                style={{ color: "#111827", backgroundColor: "#ffffff" }}
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base !text-gray-900 placeholder:text-gray-400 bg-white font-semibold focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
                 required
               />
             </div>
@@ -105,14 +107,15 @@ export default function AccountPage() {
                 value={shippingInfo.address}
                 onChange={handleChange}
                 placeholder="House / Road, Area, City"
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm sm:text-base text-gray-900 placeholder:text-gray-400 bg-white font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
+                style={{ color: "#111827", backgroundColor: "#ffffff" }}
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base !text-gray-900 placeholder:text-gray-400 bg-white font-semibold focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 transition shadow-sm text-sm sm:text-base"
+              className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 transition shadow-sm text-sm sm:text-base cursor-pointer"
             >
               {isSaved ? "Saved Successfully! ✓" : "Save Address Details"}
             </button>
