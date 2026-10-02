@@ -1,290 +1,184 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import { useCart } from "../context/CartContext";
-
-type PaymentMethod = "cod" | "bkash" | "nagad" | "card";
+import { useCart } from "@/app/context/CartContext";
 
 export default function CheckoutPage() {
+  const { cart, clearCart } = useCart();
   const router = useRouter();
-  const { cart, subtotal, deliveryCharge, grandTotal, clearCart, deductStock } = useCart();
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customer, setCustomer] = useState({
+    name: "",
+    phone: "",
+    address: "",
+  });
 
-  // সেভ করা প্রোফাইল থাকলে অটো-ফিল করা
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+
   useEffect(() => {
-    try {
-      const savedProfile = localStorage.getItem("customerProfile");
-      if (savedProfile) {
-        const profile = JSON.parse(savedProfile);
-        if (profile.name) setName(profile.name);
-        if (profile.phone) setPhone(profile.phone);
-        if (profile.address) setAddress(profile.address);
+    const saved = localStorage.getItem("neoventis_shipping_info");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setCustomer({
+          name: parsed.fullName || "",
+          phone: parsed.phone || "",
+          address: parsed.address || "",
+        });
+      } catch (e) {
+        console.error("Failed to load shipping info", e);
       }
-    } catch (e) {
-      console.error("Failed to load customer profile:", e);
     }
   }, []);
 
-  const getPaymentMethodName = () => {
-    switch (paymentMethod) {
-      case "cod":
-        return "Cash on Delivery";
-      case "bkash":
-        return "bKash";
-      case "nagad":
-        return "Nagad";
-      case "card":
-        return "Card";
-    }
-  };
+  const totalAmount = (cart || []).reduce(
+    (sum: number, item: any) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1),
+    0
+  );
 
-  const handlePlaceOrder = () => {
-    if (!name.trim()) {
-      alert("Please enter your full name.");
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customer.name || !customer.phone || !customer.address) {
+      alert("Please fill in all delivery details");
       return;
     }
 
-    if (!phone.trim() || phone.trim().length < 11) {
-      alert("Please enter a valid mobile number (at least 11 digits).");
-      return;
-    }
-
-    if (!address.trim()) {
-      alert("Please enter your delivery address.");
-      return;
-    }
-
-    if (cart.length === 0) {
-      alert("Your cart is empty. Add medicines first.");
-      router.push("/products");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const orderId = "ORD-" + Date.now().toString().slice(-8);
-
-    const order = {
-      orderId,
-      customer: {
-        name: name.trim(),
-        phone: phone.trim(),
-        address: address.trim(),
-      },
+    const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+    const newOrder = {
+      id: orderId,
+      customer,
       items: cart,
-      subtotal,
-      deliveryCharge,
-      grandTotal,
-      paymentMethod: getPaymentMethodName(),
-      status: "Order Placed",
+      totalAmount,
+      paymentMethod,
       createdAt: new Date().toISOString(),
+      status: "Processing",
     };
 
-    try {
-      // ১. ইনভেন্টরি থেকে স্টক ডিডাক্ট করা
-      deductStock(cart);
+    const existingOrders = JSON.parse(
+      localStorage.getItem("neoventis_orders") || "[]"
+    );
+    localStorage.setItem(
+      "neoventis_orders",
+      JSON.stringify([newOrder, ...existingOrders])
+    );
 
-      // ২. সর্বশেষ অর্ডারটি সেভ করা (কনফার্মেশন ও ট্র্যাকিংয়ের জন্য)
-      localStorage.setItem("latestOrder", JSON.stringify(order));
-
-      // ৩. অর্ডার হিস্টোরিতে যুক্ত করা
-      const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-      existingOrders.push(order);
-      localStorage.setItem("orders", JSON.stringify(existingOrders));
-
-      // ৪. সফল অর্ডারের পর কার্ট খালি করা
-      clearCart();
-
-      // ৫. অর্ডার কনফার্মেশন পেজে পাঠানো
-      router.push("/order-confirmation");
-    } catch (error) {
-      console.error("Order placing error:", error);
-      alert("Failed to place order. Please try again.");
-      setIsSubmitting(false);
-    }
+    clearCart();
+    router.push(`/order-confirmation?orderId=${orderId}`);
   };
 
   return (
-    <>
-      <Header />
+    <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Shipping details */}
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Delivery Details</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={customer.name}
+                onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+                placeholder="Your full name"
+                style={{ color: "#111827", backgroundColor: "#ffffff" }}
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base !text-gray-900 placeholder:text-gray-400 bg-white font-medium focus:border-emerald-500 outline-none"
+                required
+              />
+            </div>
 
-      <main className="min-h-screen bg-gray-50 px-6 py-12">
-        <div className="mx-auto max-w-7xl">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-green-600">
-              Checkout
-            </p>
-            <h1 className="mt-1 text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Complete Your Order
-            </h1>
-            <p className="mt-2 text-gray-600">
-              Please enter your delivery and payment details.
-            </p>
-          </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={customer.phone}
+                onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+                placeholder="01XXXXXXXXX"
+                style={{ color: "#111827", backgroundColor: "#ffffff" }}
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base !text-gray-900 placeholder:text-gray-400 bg-white font-medium focus:border-emerald-500 outline-none"
+                required
+              />
+            </div>
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-3">
-            {/* বাম পাশ: ফর্ম ও পেমেন্ট অপশন */}
-            <div className="space-y-8 lg:col-span-2">
-              <div className="rounded-xl border bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Delivery Information
-                </h2>
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Delivery Address
+              </label>
+              <textarea
+                rows={3}
+                value={customer.address}
+                onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
+                placeholder="House, Road, Area, City"
+                style={{ color: "#111827", backgroundColor: "#ffffff" }}
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base !text-gray-900 placeholder:text-gray-400 bg-white font-medium focus:border-emerald-500 outline-none"
+                required
+              />
+            </div>
 
-                <div className="mt-6 space-y-5">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your full name"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Mobile Number *
-                    </label>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="01XXXXXXXXX"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Delivery Address *
-                    </label>
-                    <textarea
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="House / Road, Area, City"
-                      rows={4}
-                      className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* পেমেন্ট মেথড */}
-              <div className="rounded-xl border bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Payment Method
-                </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  Select your preferred payment method.
-                </p>
-
-                <div className="mt-6 space-y-3">
-                  {[
-                    { id: "cod", name: "Cash on Delivery", desc: "Pay with cash upon delivery", icon: "💵" },
-                    { id: "bkash", name: "bKash", desc: "Pay securely using bKash wallet", icon: "📱" },
-                    { id: "nagad", name: "Nagad", desc: "Pay securely using Nagad wallet", icon: "📱" },
-                    { id: "card", name: "Debit / Credit Card", desc: "Pay with Visa or Mastercard", icon: "💳" },
-                  ].map((method) => (
-                    <label
-                      key={method.id}
-                      className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 transition ${
-                        paymentMethod === method.id
-                          ? "border-green-600 bg-green-50"
-                          : "border-gray-200 hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{method.icon}</span>
-                        <div>
-                          <p className="font-semibold text-gray-900">{method.name}</p>
-                          <p className="text-xs text-gray-500">{method.desc}</p>
-                        </div>
-                      </div>
-                      <input
-                        type="radio"
-                        name="payment"
-                        checked={paymentMethod === method.id}
-                        onChange={() => setPaymentMethod(method.id as PaymentMethod)}
-                        className="h-4 w-4 accent-green-600"
-                      />
-                    </label>
-                  ))}
-                </div>
+            <div className="pt-2">
+              <label className="block text-xs font-semibold text-gray-700 mb-2">
+                Payment Option
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 p-3 border rounded-xl border-gray-200 cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={paymentMethod === "cod"}
+                    onChange={() => setPaymentMethod("cod")}
+                    className="text-emerald-600"
+                  />
+                  <span className="text-sm font-semibold text-gray-900">
+                    Cash on Delivery
+                  </span>
+                </label>
               </div>
             </div>
 
-            {/* ডান পাশ: অর্ডার সারাংশ */}
-            <div>
-              <div className="sticky top-6 rounded-xl border bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Order Summary
-                </h2>
+            <button
+              type="submit"
+              disabled={(cart || []).length === 0}
+              className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-bold py-3.5 rounded-xl transition shadow-sm cursor-pointer"
+            >
+              Confirm Order (৳{totalAmount})
+            </button>
+          </form>
+        </div>
 
-                <div className="mt-6 max-h-60 space-y-3 overflow-y-auto pr-1">
-                  {cart.length === 0 ? (
-                    <p className="text-sm text-gray-500">Your cart is empty.</p>
-                  ) : (
-                    cart.map((item) => (
-                      <div key={item.name} className="flex justify-between text-sm">
-                        <div>
-                          <p className="font-medium text-gray-900">{item.name}</p>
-                          <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                        </div>
-                        <p className="font-semibold text-gray-900">
-                          ৳{item.price * item.quantity}
-                        </p>
-                      </div>
-                    ))
-                  )}
-                </div>
+        {/* Order summary */}
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm h-fit">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
+          <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto pr-1">
+            {(cart || []).map((item: any, index: number) => {
+              const itemKey = item.id || item.productId || item._id || index;
+              const itemName = item.name || item.title || "Medicine Item";
+              const itemPrice = Number(item.price) || 0;
+              const itemQuantity = Number(item.quantity) || 1;
 
-                <div className="my-5 border-t" />
-
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span className="font-medium text-gray-900">৳{subtotal}</span>
+              return (
+                <div key={itemKey} className="py-3 flex justify-between items-center text-sm">
+                  <div>
+                    <p className="font-semibold text-gray-900">{itemName}</p>
+                    <p className="text-xs text-gray-500">Qty: {itemQuantity}</p>
                   </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Delivery Charge</span>
-                    <span className="font-medium text-gray-900">৳{deliveryCharge}</span>
-                  </div>
-                </div>
-
-                <div className="my-5 border-t" />
-
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-gray-900">Grand Total</span>
-                  <span className="text-2xl font-bold text-green-600">
-                    ৳{grandTotal}
+                  <span className="font-bold text-gray-900">
+                    ৳{itemPrice * itemQuantity}
                   </span>
                 </div>
+              );
+            })}
+          </div>
 
-                <button
-                  onClick={handlePlaceOrder}
-                  disabled={cart.length === 0 || isSubmitting}
-                  className="mt-6 w-full rounded-lg bg-green-600 py-3 font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-                >
-                  {isSubmitting ? "Placing Order..." : "Confirm & Place Order"}
-                </button>
-              </div>
-            </div>
+          <div className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center">
+            <span className="font-bold text-base text-gray-900">Total Payable</span>
+            <span className="font-black text-xl text-emerald-600">৳{totalAmount}</span>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </>
+      </div>
+    </div>
   );
 }

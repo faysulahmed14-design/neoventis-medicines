@@ -6,8 +6,8 @@ import { useCart } from "@/app/context/CartContext";
 export default function Header() {
   const { cart, wishlist } = useCart();
 
-  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const totalWishlistCount = wishlist.length;
+  const totalCartCount = (cart || []).reduce((sum, item) => sum + item.quantity, 0);
+  const totalWishlistCount = (wishlist || []).length;
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -16,12 +16,11 @@ export default function Header() {
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-1.5 shrink-0">
             <span className="text-lg sm:text-2xl font-black tracking-tight text-emerald-600 leading-tight">
-              Neoventis<br className="sm:hidden" />
-              <span className="text-gray-900 sm:ml-1.5">Medicines</span>
+              Neoventis <span className="text-gray-900">Medicine</span>
             </span>
           </Link>
 
-          {/* Navigation Links - Desktop Only */}
+          {/* Navigation Links - Desktop */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
             <Link href="/" className="hover:text-emerald-600 transition">
               Home
