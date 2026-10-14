@@ -72,6 +72,7 @@ export default function CheckoutPage() {
 
     // 2. Also keep in localStorage for immediate client receipt & fallback
     try {
+      localStorage.setItem("latestOrder", JSON.stringify(newOrder));
       const existingOrders = JSON.parse(
         localStorage.getItem("neoventis_orders") || "[]"
       );
