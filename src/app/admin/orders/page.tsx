@@ -24,17 +24,19 @@ type Order = {
   subtotal: number;
   deliveryCharge: number;
   grandTotal: number;
-  paymentMethod: string;
+  totalAmount?: number;
   status: string;
   createdAt: string;
 };
 
 const statusOptions = [
+  "Processing",
   "Order Placed",
   "Order Confirmed",
   "Preparing",
   "Out for Delivery",
   "Delivered",
+  "Cancelled",
 ];
 
 export default function AdminOrdersPage() {
@@ -114,8 +116,14 @@ export default function AdminOrdersPage() {
     }
   }, [isAuthLoaded, admin, router]);
 
-  const totalSales = orders.reduce((total, order) => total + order.grandTotal, 0);
-  const pendingOrders = orders.filter((order) => order.status !== "Delivered").length;
+  const totalSales = orders.reduce(
+    (total: number, order: any) =>
+      total + (Number(order.totalAmount) || Number(order.grandTotal) || 0),
+    0
+  );
+  const pendingOrders = orders.filter(
+    (order: any) => order.status !== "Delivered" && order.status !== "Cancelled"
+  ).length;
 
   if (!isAuthLoaded || !admin) {
     return (
@@ -210,21 +218,35 @@ export default function AdminOrdersPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                {orders.map((order) => (
-                  <div
-                    key={order.orderId}
-                    className="overflow-hidden rounded-xl border bg-white shadow-sm"
-                  >
-                    {/* কার্ড টপ */}
-                    <div className="border-b bg-gray-50 p-6">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-xs uppercase font-semibold text-gray-500">Order ID</p>
-                          <h2 className="text-xl font-bold text-gray-900">{order.orderId}</h2>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {new Date(order.createdAt).toLocaleString()}
-                          </p>
-                        </div>
+                {orders.map((order: any) => {
+                  const calculatedSubtotal =
+                    order.subtotal !== undefined
+                      ? order.subtotal
+                      : (order.items || []).reduce(
+                          (sum: number, it: any) =>
+                            sum + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+                          0
+                        );
+                  const deliveryFee =
+                    order.deliveryCharge !== undefined ? order.deliveryCharge : 60;
+                  const finalTotal =
+                    order.totalAmount || order.grandTotal || (calculatedSubtotal + deliveryFee);
+
+                  return (
+                    <div
+                      key={order.orderId || order.id || order._id}
+                      className="overflow-hidden rounded-xl border bg-white shadow-sm"
+                    >
+                      {/* কার্ড টপ */}
+                      <div className="border-b bg-gray-50 p-6">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-xs uppercase font-semibold text-gray-500">Order ID</p>
+                            <h2 className="text-xl font-bold text-gray-900">{order.orderId || order.id}</h2>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {order.createdAt ? new Date(order.createdAt).toLocaleString() : ""}
+                            </p>
+                          </div>
 
                         <div>
                           <span className={`inline-block rounded-full px-4 py-1.5 text-xs font-semibold ${
@@ -254,7 +276,7 @@ export default function AdminOrdersPage() {
                       <div>
                         <h3 className="font-bold text-gray-900 border-b pb-2">Ordered Medicines</h3>
                         <div className="mt-3 space-y-2 max-h-40 overflow-y-auto pr-1">
-                          {order.items?.map((item) => (
+                          {order.items?.map((item: any) => (
                             <div key={item.name} className="flex justify-between text-sm bg-gray-50 p-2 rounded">
                               <div>
                                 <p className="font-medium text-gray-900">{item.name}</p>
@@ -272,19 +294,19 @@ export default function AdminOrdersPage() {
                         <div className="mt-3 space-y-1.5 text-sm">
                           <div className="flex justify-between text-gray-600">
                             <span>Method:</span>
-                            <span className="font-medium text-gray-900">{order.paymentMethod}</span>
+                            <span className="font-medium text-gray-900 uppercase">{order.paymentMethod || "cod"}</span>
                           </div>
                           <div className="flex justify-between text-gray-600">
                             <span>Subtotal:</span>
-                            <span className="font-medium text-gray-900">৳{order.subtotal}</span>
+                            <span className="font-medium text-gray-900">৳{calculatedSubtotal}</span>
                           </div>
                           <div className="flex justify-between text-gray-600">
                             <span>Delivery:</span>
-                            <span className="font-medium text-gray-900">৳{order.deliveryCharge}</span>
+                            <span className="font-medium text-gray-900">৳{deliveryFee}</span>
                           </div>
                           <div className="flex justify-between border-t pt-2 font-bold text-base text-gray-900">
                             <span>Grand Total:</span>
-                            <span className="text-green-600">৳{order.grandTotal}</span>
+                            <span className="text-emerald-600 font-black">৳{finalTotal}</span>
                           </div>
                         </div>
                       </div>
@@ -308,7 +330,8 @@ export default function AdminOrdersPage() {
                       </select>
                     </div>
                   </div>
-                ))}
+                );
+              })}
               </div>
             )}
           </div>
