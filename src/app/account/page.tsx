@@ -28,7 +28,6 @@ export default function AccountPage() {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    // Load saved address
     const savedAddress = localStorage.getItem("neoventis_shipping_info");
     if (savedAddress) {
       try {
@@ -38,7 +37,6 @@ export default function AccountPage() {
       }
     }
 
-    // Load orders directly from localStorage
     const savedOrders = localStorage.getItem("neoventis_orders");
     if (savedOrders) {
       try {
