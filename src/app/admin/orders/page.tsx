@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "../../context/AuthContext";
 
 type OrderItem = {
   name: string;
@@ -81,23 +84,80 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const router = useRouter();
+  const { admin, logoutAdmin, isAuthLoaded } = useAuth();
+
+  useEffect(() => {
+    if (isAuthLoaded && !admin) {
+      router.push("/admin/login");
+    }
+  }, [isAuthLoaded, admin, router]);
+
   const totalSales = orders.reduce((total, order) => total + order.grandTotal, 0);
   const pendingOrders = orders.filter((order) => order.status !== "Delivered").length;
 
+  if (!isAuthLoaded || !admin) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
+        <div className="text-center space-y-3">
+          <div className="text-3xl animate-spin">🛡️</div>
+          <p className="text-xs text-slate-400">Verifying Admin Access...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-12">
-        <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen bg-gray-50 px-6 py-10">
+      <div className="mx-auto max-w-7xl space-y-8">
+        
+        {/* Admin Bar */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white p-6 rounded-3xl border border-gray-200/80 shadow-sm">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-green-600">
-              Admin Panel
-            </p>
-            <h1 className="mt-2 text-3xl font-extrabold text-gray-900">
-              Order Management
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                🛡️ ADMIN CONSOLE
+              </span>
+              <span className="text-xs text-gray-500 font-mono">
+                {admin.email}
+              </span>
+            </div>
+            <h1 className="mt-2 text-2xl sm:text-3xl font-black text-gray-900">
+              Customer Orders Management
             </h1>
-            <p className="mt-1 text-gray-600">
-              Update order processing stage and manage delivery status.
+            <p className="mt-0.5 text-xs sm:text-sm text-gray-500">
+              Review placed orders, update delivery progress, and audit payments.
             </p>
           </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/admin/dashboard"
+              className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 transition"
+            >
+              📊 Dashboard
+            </Link>
+            <Link
+              href="/admin/products"
+              className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 transition"
+            >
+              💊 Products
+            </Link>
+            <Link
+              href="/"
+              className="rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 transition"
+            >
+              🏪 Store
+            </Link>
+            <button
+              type="button"
+              onClick={logoutAdmin}
+              className="rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 px-3.5 py-2 text-xs font-bold text-red-600 transition cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
 
           {/* স্ট্যাটাস কার্ডস */}
           <div className="mt-8 grid gap-5 md:grid-cols-3">

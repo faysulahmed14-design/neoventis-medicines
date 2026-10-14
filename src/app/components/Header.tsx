@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function Header() {
   const { cart, wishlist } = useCart();
+  const { customer, admin } = useAuth();
 
   const totalCartCount = (cart || []).reduce(
     (sum: number, item: any) => sum + (Number(item.quantity) || 1),
@@ -34,8 +36,8 @@ export default function Header() {
             <Link href="/tracking" className="hover:text-emerald-600 transition">
               Track Order
             </Link>
-            <Link href="/account" className="hover:text-emerald-600 transition">
-              My Account
+            <Link href={customer ? "/account" : "/login"} className="hover:text-emerald-600 transition">
+              {customer ? "My Profile" : "My Account"}
             </Link>
           </nav>
 
@@ -44,7 +46,7 @@ export default function Header() {
             {/* Wishlist */}
             <Link
               href="/wishlist"
-              className="relative p-2 text-gray-700 hover:text-red-500 rounded-lg border border-gray-200 hover:border-red-200 transition"
+              className="relative p-2 text-gray-700 hover:text-red-500 rounded-xl border border-gray-200 hover:border-red-200 transition"
               title="Wishlist"
             >
               ❤️
@@ -58,7 +60,7 @@ export default function Header() {
             {/* Cart */}
             <Link
               href="/cart"
-              className="relative p-2 text-gray-700 hover:text-emerald-600 rounded-lg border border-gray-200 hover:border-emerald-200 transition"
+              className="relative p-2 text-gray-700 hover:text-emerald-600 rounded-xl border border-gray-200 hover:border-emerald-200 transition"
               title="Cart"
             >
               🛒
@@ -69,12 +71,37 @@ export default function Header() {
               )}
             </Link>
 
-            {/* Admin Panel */}
+            {/* Customer Auth Button */}
+            {customer ? (
+              <Link
+                href="/account"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100 transition"
+                title={`Logged in as ${customer.name}`}
+              >
+                <span>👤</span>
+                <span className="max-w-[80px] truncate">{customer.name.split(" ")[0]}</span>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition"
+              >
+                Login
+              </Link>
+            )}
+
+            {/* Admin Portal Button */}
             <Link
-              href="/admin/products"
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold rounded-lg bg-gray-100 text-gray-800 hover:bg-emerald-600 hover:text-white transition shrink-0"
+              href={admin ? "/admin/dashboard" : "/admin/login"}
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold rounded-xl transition shrink-0 flex items-center gap-1 ${
+                admin
+                  ? "bg-slate-900 text-emerald-400 border border-emerald-500/30 hover:bg-slate-800"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+              title={admin ? "Admin Console (Active)" : "Admin Portal Login"}
             >
-              Admin
+              <span>{admin ? "🛡️" : "⚙️"}</span>
+              <span>Admin</span>
             </Link>
           </div>
         </div>

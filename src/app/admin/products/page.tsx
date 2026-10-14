@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AdminProductsPage() {
   const { products, updateProductStock, addNewProduct } = useCart();
@@ -69,39 +71,83 @@ export default function AdminProductsPage() {
     setShowAddForm(false);
   };
 
+  const router = useRouter();
+  const { admin, logoutAdmin, isAuthLoaded } = useAuth();
+
+  useEffect(() => {
+    if (isAuthLoaded && !admin) {
+      router.push("/admin/login");
+    }
+  }, [isAuthLoaded, admin, router]);
+
+  if (!isAuthLoaded || !admin) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
+        <div className="text-center space-y-3">
+          <div className="text-3xl animate-spin">🛡️</div>
+          <p className="text-xs text-slate-400">Verifying Admin Access...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
-        <div className="mx-auto max-w-7xl">
-          {/* হেডার ও অ্যাকশন */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-green-600">
-                Admin Panel
-              </p>
-              <h1 className="mt-1 text-3xl font-extrabold text-gray-900">
-                Inventory & Stock Management
-              </h1>
-              <p className="mt-1 text-gray-600">
-                Directly monitor, add, and manage medicine stock levels across the store.
-              </p>
+      <div className="mx-auto max-w-7xl space-y-8">
+        
+        {/* Admin Bar */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white p-6 rounded-3xl border border-gray-200/80 shadow-sm">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                🛡️ ADMIN CONSOLE
+              </span>
+              <span className="text-xs text-gray-500 font-mono">
+                {admin.email}
+              </span>
             </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 transition"
-              >
-                {showAddForm ? "✕ Close Form" : "+ Add New Medicine"}
-              </button>
-
-              <Link
-                href="/admin/dashboard"
-                className="inline-block rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
-              >
-                ← Dashboard
-              </Link>
-            </div>
+            <h1 className="mt-2 text-2xl sm:text-3xl font-black text-gray-900">
+              Inventory & Stock Management
+            </h1>
+            <p className="mt-0.5 text-xs sm:text-sm text-gray-500">
+              Directly monitor, add, and manage medicine stock levels across the store.
+            </p>
           </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition cursor-pointer"
+            >
+              {showAddForm ? "✕ Close Form" : "+ Add New Medicine"}
+            </button>
+            <Link
+              href="/admin/dashboard"
+              className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 transition"
+            >
+              📊 Dashboard
+            </Link>
+            <Link
+              href="/admin/orders"
+              className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 transition"
+            >
+              📦 Orders
+            </Link>
+            <Link
+              href="/"
+              className="rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 transition"
+            >
+              🏪 Store
+            </Link>
+            <button
+              type="button"
+              onClick={logoutAdmin}
+              className="rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 px-3.5 py-2 text-xs font-bold text-red-600 transition cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
 
           {/* নতুন মেডিসিন যোগ করার কার্ড */}
           {showAddForm && (
