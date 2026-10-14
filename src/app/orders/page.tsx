@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 
 type OrderItem = {
   name: string;
@@ -50,10 +48,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <>
-      <Header />
-
-      <main className="min-h-screen bg-gray-50 px-6 py-12">
+    <div className="min-h-screen bg-gray-50 px-6 py-12">
         <div className="mx-auto max-w-7xl">
 
           {/* Page Header */}
@@ -238,9 +233,6 @@ export default function OrdersPage() {
           )}
 
         </div>
-      </main>
-
-      <Footer />
-    </>
+    </div>
   );
 }

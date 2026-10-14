@@ -1,8 +1,5 @@
 "use client";
 
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-
 const stats = [
   {
     title: "Total Orders",
@@ -80,10 +77,7 @@ const recentOrders = [
 
 export default function AdminDashboardPage() {
   return (
-    <>
-      <Header />
-
-      <main className="min-h-screen bg-gray-100 px-6 py-10">
+    <div className="min-h-screen bg-gray-100 px-6 py-10">
         <div className="mx-auto max-w-7xl">
 
           {/* Page Header */}
@@ -304,9 +298,6 @@ export default function AdminDashboardPage() {
           </section>
 
         </div>
-      </main>
-
-      <Footer />
-    </>
+    </div>
   );
 }

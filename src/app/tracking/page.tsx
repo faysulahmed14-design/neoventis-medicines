@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 
 type OrderItem = {
   name: string;
@@ -94,10 +92,7 @@ export default function TrackingPage() {
   const currentStep = order ? statusSteps.indexOf(order.status) : -1;
 
   return (
-    <>
-      <Header />
-
-      <main className="min-h-screen bg-gray-50 px-6 py-12">
+    <div className="min-h-screen bg-gray-50 px-6 py-12">
         <div className="mx-auto max-w-4xl">
           {/* হেডিং */}
           <div className="text-center">
@@ -259,9 +254,6 @@ export default function TrackingPage() {
             </div>
           )}
         </div>
-      </main>
-
-      <Footer />
-    </>
+    </div>
   );
 }

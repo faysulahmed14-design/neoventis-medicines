@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import { useCart } from "../context/CartContext";
 
 export default function CartPage() {
@@ -17,10 +15,7 @@ export default function CartPage() {
   } = useCart();
 
   return (
-    <>
-      <Header />
-
-      <main className="min-h-screen bg-gray-50 px-6 py-12">
+    <div className="min-h-screen bg-gray-50 px-6 py-12">
         <div className="mx-auto max-w-6xl">
           {/* পেজ হেডার */}
           <div className="mb-8">
@@ -164,9 +159,6 @@ export default function CartPage() {
             </div>
           )}
         </div>
-      </main>
-
-      <Footer />
-    </>
+    </div>
   );
 }

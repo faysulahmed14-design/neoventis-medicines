@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 
 type OrderItem = {
   name: string;
@@ -87,10 +85,7 @@ export default function AdminOrdersPage() {
   const pendingOrders = orders.filter((order) => order.status !== "Delivered").length;
 
   return (
-    <>
-      <Header />
-
-      <main className="min-h-screen bg-gray-50 px-6 py-12">
+    <div className="min-h-screen bg-gray-50 px-6 py-12">
         <div className="mx-auto max-w-7xl">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-green-600">
@@ -237,9 +232,6 @@ export default function AdminOrdersPage() {
             )}
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </>
+    </div>
   );
 }

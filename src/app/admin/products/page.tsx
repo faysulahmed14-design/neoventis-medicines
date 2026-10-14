@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 import { useCart } from "../../context/CartContext";
 
 export default function AdminProductsPage() {
@@ -72,10 +70,7 @@ export default function AdminProductsPage() {
   };
 
   return (
-    <>
-      <Header />
-
-      <main className="min-h-screen bg-gray-50 px-6 py-10">
+    <div className="min-h-screen bg-gray-50 px-6 py-10">
         <div className="mx-auto max-w-7xl">
           {/* হেডার ও অ্যাকশন */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -333,9 +328,6 @@ export default function AdminProductsPage() {
             </div>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </>
+    </div>
   );
 }

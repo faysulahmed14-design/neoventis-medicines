@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 
 type OrderItem = {
   name: string;
@@ -48,38 +46,28 @@ export default function OrderConfirmationPage() {
 
   if (!order) {
     return (
-      <>
-        <Header />
-        <main className="min-h-screen bg-gray-50 px-6 py-16 text-center">
-          <div className="mx-auto max-w-md rounded-2xl border bg-white p-8 shadow-sm">
-            <div className="text-5xl">📄</div>
-            <h1 className="mt-4 text-2xl font-bold text-gray-900">
-              No Recent Invoice Found
-            </h1>
-            <p className="mt-2 text-sm text-gray-500">
-              It seems no order was placed in this session.
-            </p>
-            <Link
-              href="/products"
-              className="mt-6 inline-block rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition"
-            >
-              Start Shopping
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </>
+      <div className="min-h-screen bg-gray-50 px-6 py-16 text-center">
+        <div className="mx-auto max-w-md rounded-2xl border bg-white p-8 shadow-sm">
+          <div className="text-5xl">📄</div>
+          <h1 className="mt-4 text-2xl font-bold text-gray-900">
+            No Recent Invoice Found
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">
+            It seems no order was placed in this session.
+          </p>
+          <Link
+            href="/products"
+            className="mt-6 inline-block rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition"
+          >
+            Start Shopping
+          </Link>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
-      {/* প্রিন্ট করার সময় হেডার লুকিয়ে রাখা */}
-      <div className="print:hidden">
-        <Header />
-      </div>
-
-      <main className="min-h-screen bg-gray-100 px-4 py-8 print:bg-white print:p-0">
+    <div className="min-h-screen bg-gray-100 px-4 py-8 print:bg-white print:p-0">
         <div className="mx-auto max-w-3xl">
           {/* অ্যাকশন বাটন বার (প্রিন্টের সময় দেখাবে না) */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4 print:hidden">
@@ -235,12 +223,6 @@ export default function OrderConfirmationPage() {
             </div>
           </div>
         </div>
-      </main>
-
-      {/* প্রিন্ট করার সময় ফুটার লুকিয়ে রাখা */}
-      <div className="print:hidden">
-        <Footer />
-      </div>
-    </>
+    </div>
   );
 }

@@ -1,18 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import { useCart } from "../context/CartContext";
 
 export default function WishlistPage() {
   const { wishlist, toggleWishlist, addToCart } = useCart();
 
   return (
-    <>
-      <Header />
-
-      <main className="min-h-screen bg-gray-50 px-6 py-12">
+    <div className="min-h-screen bg-gray-50 px-6 py-12">
         <div className="mx-auto max-w-7xl">
           {/* হেডিং */}
           <div className="text-center">
@@ -102,9 +97,6 @@ export default function WishlistPage() {
             </div>
           )}
         </div>
-      </main>
-
-      <Footer />
-    </>
+    </div>
   );
 }
