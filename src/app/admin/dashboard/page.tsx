@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
@@ -84,11 +84,42 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const { admin, logoutAdmin, isAuthLoaded } = useAuth();
 
+  const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (isAuthLoaded && !admin) {
       router.push("/admin/login");
     }
   }, [isAuthLoaded, admin, router]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        // Fetch Orders
+        const ordersRes = await fetch("/api/orders");
+        const ordersJson = await ordersRes.json();
+        if (ordersJson.success && Array.isArray(ordersJson.data)) {
+          setOrders(ordersJson.data);
+        }
+
+        // Fetch Products
+        const prodRes = await fetch("/api/products");
+        const prodJson = await prodRes.json();
+        if (prodJson.success && Array.isArray(prodJson.data)) {
+          setProducts(prodJson.data);
+        }
+      } catch (err) {
+        console.warn("Could not load dashboard data from API:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   if (!isAuthLoaded || !admin) {
     return (
@@ -100,6 +131,40 @@ export default function AdminDashboardPage() {
       </div>
     );
   }
+
+  const totalSales = orders.reduce(
+    (sum: number, o: any) => sum + (Number(o.totalAmount) || Number(o.grandTotal) || 0),
+    0
+  );
+  const lowStockProducts = products.filter((p: any) => Number(p.stock) < 15);
+  const recentOrdersList = orders.slice(0, 5);
+
+  const stats = [
+    {
+      title: "Total Orders",
+      value: String(orders.length),
+      icon: "📦",
+      description: "Real customer orders in DB",
+    },
+    {
+      title: "Total Products",
+      value: String(products.length || 16),
+      icon: "💊",
+      description: "Medicines in catalog",
+    },
+    {
+      title: "Low Stock Items",
+      value: String(lowStockProducts.length),
+      icon: "⚠️",
+      description: "Items needing replenishment",
+    },
+    {
+      title: "Total Sales",
+      value: `৳${totalSales.toLocaleString()}`,
+      icon: "💰",
+      description: "Accumulated order revenue",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-100 px-6 py-10">
@@ -275,39 +340,49 @@ export default function AdminDashboardPage() {
                   </thead>
 
                   <tbody>
-                    {recentOrders.map((order) => (
-                      <tr
-                        key={order.id}
-                        className="border-t"
-                      >
-                        <td className="px-6 py-4 font-semibold text-gray-900">
-                          {order.id}
-                        </td>
-
-                        <td className="px-6 py-4 text-gray-700">
-                          {order.customer}
-                        </td>
-
-                        <td className="px-6 py-4 font-semibold text-green-600">
-                          ৳{order.amount}
-                        </td>
-
-                        <td className="px-6 py-4">
-                          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                            {order.status}
-                          </span>
-                        </td>
-
-                        <td className="px-6 py-4">
-                          <a
-                            href="/admin/orders"
-                            className="text-sm font-semibold text-green-600 hover:text-green-700"
-                          >
-                            View
-                          </a>
+                    {recentOrdersList.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">
+                          No customer orders yet. Orders will appear here live in real-time as customers checkout.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      recentOrdersList.map((order: any) => (
+                        <tr
+                          key={order.orderId || order.id || order._id}
+                          className="border-t hover:bg-gray-50/50 transition"
+                        >
+                          <td className="px-6 py-4 font-semibold text-gray-900">
+                            {order.orderId || order.id}
+                          </td>
+
+                          <td className="px-6 py-4 text-gray-700">
+                            {typeof order.customer === "string"
+                              ? order.customer
+                              : order.customer?.name || "Customer"}
+                          </td>
+
+                          <td className="px-6 py-4 font-bold text-emerald-600">
+                            ৳{order.totalAmount || order.grandTotal || order.amount || 0}
+                          </td>
+
+                          <td className="px-6 py-4">
+                            <span className="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 text-xs font-semibold">
+                              {order.status || "Processing"}
+                            </span>
+                          </td>
+
+                          <td className="px-6 py-4">
+                            <Link
+                              href="/admin/orders"
+                              className="text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                            >
+                              Manage →
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>

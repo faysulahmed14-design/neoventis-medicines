@@ -67,16 +67,31 @@ export default function TrackingPage() {
     };
   }, []);
 
-  const handleSearchOrder = (e: React.FormEvent) => {
+  const handleSearchOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchId.trim()) return;
 
     try {
-      const allOrders: Order[] = JSON.parse(
-        localStorage.getItem("orders") || "[]"
+      // 1. First search from MongoDB Atlas cloud database
+      const res = await fetch(`/api/orders?orderId=${encodeURIComponent(searchId.trim())}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setOrder(json.data[0]);
+        return;
+      }
+    } catch (err) {
+      console.warn("Could not query cloud orders, checking local storage:", err);
+    }
+
+    // 2. Fallback to localStorage
+    try {
+      const allOrders: any[] = JSON.parse(
+        localStorage.getItem("neoventis_orders") || localStorage.getItem("orders") || "[]"
       );
       const matched = allOrders.find(
-        (o) => o.orderId.toLowerCase() === searchId.trim().toLowerCase()
+        (o) =>
+          (o.orderId && o.orderId.toLowerCase() === searchId.trim().toLowerCase()) ||
+          (o.id && o.id.toLowerCase() === searchId.trim().toLowerCase())
       );
 
       if (matched) {
@@ -86,6 +101,7 @@ export default function TrackingPage() {
       }
     } catch (e) {
       console.error(e);
+      alert("No order found with this ID.");
     }
   };
 

@@ -39,42 +39,63 @@ const statusOptions = [
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchOrders = async () => {
     try {
-      const savedOrders = localStorage.getItem("orders");
-      if (savedOrders) {
-        const parsedOrders: Order[] = JSON.parse(savedOrders);
-        setOrders([...parsedOrders].reverse());
+      setLoading(true);
+      const res = await fetch("/api/orders");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setOrders(json.data);
+      } else {
+        const saved = localStorage.getItem("neoventis_orders") || localStorage.getItem("orders");
+        if (saved) {
+          setOrders(JSON.parse(saved));
+        }
       }
     } catch (e) {
-      console.error("Failed to load orders:", e);
+      console.warn("Could not fetch orders from cloud API, using local fallback:", e);
+      const saved = localStorage.getItem("neoventis_orders") || localStorage.getItem("orders");
+      if (saved) {
+        setOrders(JSON.parse(saved));
+      }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchOrders();
   }, []);
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
-    const savedOrders = localStorage.getItem("orders");
-    if (!savedOrders) return;
-
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const parsedOrders: Order[] = JSON.parse(savedOrders);
-      const updatedOrders = parsedOrders.map((order) =>
-        order.orderId === orderId ? { ...order, status: newStatus } : order
+      await fetch("/api/orders", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.orderId === orderId || (order as any).id === orderId
+            ? { ...order, status: newStatus }
+            : order
+        )
       );
 
-      // মূল অর্ডার হিস্টোরি আপডেট
-      localStorage.setItem("orders", JSON.stringify(updatedOrders));
-      setOrders([...updatedOrders].reverse());
-
-      // কাস্টমার ট্র্যাকিংয়ের জন্য latestOrder আপডেট
-      const latestOrderData = localStorage.getItem("latestOrder");
-      if (latestOrderData) {
-        const latestOrder: Order = JSON.parse(latestOrderData);
-        if (latestOrder.orderId === orderId) {
-          localStorage.setItem(
-            "latestOrder",
-            JSON.stringify({ ...latestOrder, status: newStatus })
+      // Local storage sync as well
+      const saved = localStorage.getItem("neoventis_orders");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const updated = parsed.map((o: any) =>
+            o.orderId === orderId || o.id === orderId ? { ...o, status: newStatus } : o
           );
+          localStorage.setItem("neoventis_orders", JSON.stringify(updated));
+        } catch (err) {
+          console.error(err);
         }
       }
 

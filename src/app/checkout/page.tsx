@@ -37,15 +37,19 @@ export default function CheckoutPage() {
     0
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customer.name || !customer.phone || !customer.address) {
       alert("Please fill in all delivery details");
       return;
     }
 
+    setSubmitting(true);
     const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
     const newOrder = {
+      orderId,
       id: orderId,
       customer,
       items: cart,
@@ -55,13 +59,29 @@ export default function CheckoutPage() {
       status: "Processing",
     };
 
-    const existingOrders = JSON.parse(
-      localStorage.getItem("neoventis_orders") || "[]"
-    );
-    localStorage.setItem(
-      "neoventis_orders",
-      JSON.stringify([newOrder, ...existingOrders])
-    );
+    try {
+      // 1. Save to MongoDB Atlas via backend API
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newOrder),
+      });
+    } catch (err) {
+      console.warn("Could not save order to cloud, saving locally:", err);
+    }
+
+    // 2. Also keep in localStorage for immediate client receipt & fallback
+    try {
+      const existingOrders = JSON.parse(
+        localStorage.getItem("neoventis_orders") || "[]"
+      );
+      localStorage.setItem(
+        "neoventis_orders",
+        JSON.stringify([newOrder, ...existingOrders])
+      );
+    } catch (e) {
+      console.error("Local storage error:", e);
+    }
 
     clearCart();
     router.push(`/order-confirmation?orderId=${orderId}`);
@@ -141,10 +161,17 @@ export default function CheckoutPage() {
 
             <button
               type="submit"
-              disabled={(cart || []).length === 0}
-              className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-bold py-3.5 rounded-xl transition shadow-sm cursor-pointer"
+              disabled={(cart || []).length === 0 || submitting}
+              className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-bold py-3.5 rounded-xl transition shadow-sm cursor-pointer flex items-center justify-center gap-2"
             >
-              Confirm Order (৳{totalAmount})
+              {submitting ? (
+                <>
+                  <span className="inline-block animate-spin">⏳</span>
+                  <span>Placing Order in Database...</span>
+                </>
+              ) : (
+                <span>Confirm Order (৳{totalAmount})</span>
+              )}
             </button>
           </form>
         </div>

@@ -33,16 +33,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Initial load from localStorage
+  // Initial load from MongoDB Atlas API with localStorage fallback
   useEffect(() => {
-    try {
-      const savedProducts = localStorage.getItem("inventory_products");
-      if (savedProducts) {
-        setProducts(JSON.parse(savedProducts));
-      } else {
-        localStorage.setItem("inventory_products", JSON.stringify(initialProducts));
+    const loadProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setProducts(json.data);
+          localStorage.setItem("inventory_products", JSON.stringify(json.data));
+          return;
+        }
+      } catch (err) {
+        console.warn("Could not load products from database API, using local fallback:", err);
       }
 
+      try {
+        const savedProducts = localStorage.getItem("inventory_products");
+        if (savedProducts) {
+          setProducts(JSON.parse(savedProducts));
+        } else {
+          localStorage.setItem("inventory_products", JSON.stringify(initialProducts));
+        }
+      } catch (e) {
+        console.error("Failed to load state from localStorage:", e);
+      }
+    };
+
+    loadProducts();
+
+    try {
       const savedCart = localStorage.getItem("cart");
       if (savedCart) {
         setCart(JSON.parse(savedCart));
@@ -53,7 +73,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setWishlist(JSON.parse(savedWishlist));
       }
     } catch (e) {
-      console.error("Failed to load state from localStorage:", e);
+      console.error("Failed to load cart/wishlist:", e);
     } finally {
       setIsLoaded(true);
     }
@@ -171,14 +191,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     saveProducts(updatedProducts);
   };
 
-  const updateProductStock = (name: string, newStock: number) => {
+  const updateProductStock = async (name: string, newStock: number) => {
+    const finalStock = Math.max(0, newStock);
     const updatedProducts = products.map((prod) =>
-      prod.name === name ? { ...prod, stock: Math.max(0, newStock) } : prod
+      prod.name === name ? { ...prod, stock: finalStock } : prod
     );
     saveProducts(updatedProducts);
+
+    try {
+      await fetch("/api/products", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, stock: finalStock }),
+      });
+    } catch (err) {
+      console.warn("Could not sync stock to database:", err);
+    }
   };
 
-  const addNewProduct = (newProd: Product) => {
+  const addNewProduct = async (newProd: Product) => {
     const exists = products.some(
       (p) => p.name.toLowerCase() === newProd.name.toLowerCase()
     );
@@ -189,6 +220,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const updated = [newProd, ...products];
     saveProducts(updated);
+
+    try {
+      await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProd),
+      });
+    } catch (err) {
+      console.warn("Could not sync new product to database:", err);
+    }
+
     alert(`"${newProd.name}" added to inventory successfully!`);
   };
 
