@@ -144,7 +144,7 @@ export default function AdminLoginPage() {
         <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-5 text-slate-200">
           <form onSubmit={handleAdminLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
                 Admin ID / Email
               </label>
               <input
@@ -152,13 +152,14 @@ export default function AdminLoginPage() {
                 placeholder="admin@neoventis.com"
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-700 bg-slate-800/80 text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition"
+                style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#1e293b" }}
+                className="dark-input w-full px-4 py-3 text-base font-semibold rounded-xl border border-slate-700 bg-slate-800 text-white placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
                 Security Password
               </label>
               <input
@@ -166,7 +167,8 @@ export default function AdminLoginPage() {
                 placeholder="••••••••"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-700 bg-slate-800/80 text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition"
+                style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#1e293b" }}
+                className="dark-input w-full px-4 py-3 text-base font-semibold rounded-xl border border-slate-700 bg-slate-800 text-white placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition"
                 required
               />
             </div>

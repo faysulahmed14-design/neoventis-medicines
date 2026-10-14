@@ -1,14 +1,32 @@
 @import "tailwindcss";
 
-/* Mobile input & textarea text visibility fix */
-input, textarea, select {
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
-  opacity: 1 !important;
+/* Default light input text color */
+input:not(.dark-input), textarea:not(.dark-input), select:not(.dark-input) {
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+  opacity: 1;
 }
 
-input::placeholder, textarea::placeholder {
-  color: #9ca3af !important;
-  -webkit-text-fill-color: #9ca3af !important;
+input:not(.dark-input)::placeholder, textarea:not(.dark-input)::placeholder {
+  color: #9ca3af;
+  -webkit-text-fill-color: #9ca3af;
+  opacity: 1;
+}
+
+/* Dark mode inputs (Admin Portal & dark sections) */
+.dark-input,
+.bg-slate-900 input,
+.bg-slate-950 input {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  background-color: #1e293b !important;
+}
+
+.dark-input::placeholder,
+.bg-slate-900 input::placeholder,
+.bg-slate-950 input::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
   opacity: 1 !important;
 }
