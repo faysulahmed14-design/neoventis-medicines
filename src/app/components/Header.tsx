@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 
 export default function Header() {
   const { cart, wishlist } = useCart();
-  const { customer, admin } = useAuth();
+  const { admin } = useAuth();
 
   const totalCartCount = (cart || []).reduce(
     (sum: number, item: any) => sum + (Number(item.quantity) || 1),
@@ -26,7 +26,7 @@ export default function Header() {
           </Link>
 
           {/* Navigation Links - Desktop */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+          <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600">
             <Link href="/" className="hover:text-emerald-600 transition">
               Home
             </Link>
@@ -36,13 +36,20 @@ export default function Header() {
             <Link href="/tracking" className="hover:text-emerald-600 transition">
               Track Order
             </Link>
-            <Link href={customer ? "/account" : "/login"} className="hover:text-emerald-600 transition">
-              {customer ? "My Profile" : "My Account"}
-            </Link>
           </nav>
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Quick Hotline Pill */}
+            <a
+              href="tel:01758940277"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 hover:bg-emerald-100 transition"
+              title="Call for Emergency Medicine Assistance"
+            >
+              <span>📞</span>
+              <span>01758-940277</span>
+            </a>
+
             {/* Wishlist */}
             <Link
               href="/wishlist"
@@ -71,37 +78,18 @@ export default function Header() {
               )}
             </Link>
 
-            {/* Customer Auth Button */}
-            {customer ? (
-              <Link
-                href="/account"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100 transition"
-                title={`Logged in as ${customer.name}`}
-              >
-                <span>👤</span>
-                <span className="max-w-[80px] truncate">{customer.name.split(" ")[0]}</span>
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition"
-              >
-                Login
-              </Link>
-            )}
-
             {/* Admin Portal Button */}
             <Link
               href={admin ? "/admin/dashboard" : "/admin/login"}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold rounded-xl transition shrink-0 flex items-center gap-1 ${
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold rounded-xl transition shrink-0 flex items-center gap-1.5 ${
                 admin
                   ? "bg-slate-900 text-emerald-400 border border-emerald-500/30 hover:bg-slate-800"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
-              title={admin ? "Admin Console (Active)" : "Admin Portal Login"}
+              title={admin ? "Admin Console (Active)" : "Pharmacy Admin Portal"}
             >
               <span>{admin ? "🛡️" : "⚙️"}</span>
-              <span>Admin</span>
+              <span className="hidden xs:inline">{admin ? "Dashboard" : "Admin"}</span>
             </Link>
           </div>
         </div>

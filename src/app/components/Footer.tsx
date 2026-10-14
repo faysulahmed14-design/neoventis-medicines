@@ -23,7 +23,7 @@ export default function Footer() {
               <li><Link href="/" className="hover:text-emerald-600">Home</Link></li>
               <li><Link href="/products" className="hover:text-emerald-600">All Medicines</Link></li>
               <li><Link href="/tracking" className="hover:text-emerald-600">Order Tracking</Link></li>
-              <li><Link href="/account" className="hover:text-emerald-600">My Account</Link></li>
+              <li><Link href="/admin/login" className="hover:text-emerald-600">Admin Portal</Link></li>
             </ul>
           </div>
 

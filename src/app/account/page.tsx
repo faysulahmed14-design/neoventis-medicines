@@ -81,45 +81,19 @@ export default function AccountPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-              {customer ? `Welcome, ${customer.name}!` : "Customer Profile"}
+              Delivery Details & Orders
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-gray-500">
-              Manage your default delivery address and track past medicine orders.
+              Manage your default medicine delivery address and view past orders on this device.
             </p>
           </div>
-
-          {customer ? (
-            <button
-              type="button"
-              onClick={logoutCustomer}
-              className="px-4 py-2 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold transition self-start sm:self-auto cursor-pointer"
-            >
-              Log Out
-            </button>
-          ) : (
-            <Link
-              href="/login"
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm self-start sm:self-auto"
-            >
-              Sign In / Register
-            </Link>
-          )}
+          <Link
+            href="/products"
+            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm self-start sm:self-auto"
+          >
+            Order Medicines →
+          </Link>
         </div>
-
-        {/* Not logged in notification banner */}
-        {!customer && (
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="text-emerald-900">
-              <strong>Tip:</strong> Create an account or sign in to save your prescriptions, addresses, and order history across devices.
-            </div>
-            <Link
-              href="/login"
-              className="font-bold text-emerald-700 hover:underline shrink-0"
-            >
-              Customer Login →
-            </Link>
-          </div>
-        )}
 
         {/* Shipping Form Card */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">
