@@ -64,6 +64,37 @@ export default function ProductsPage() {
         </div>
       )}
 
+      {/* Product List Schema.org for Google Search Rich Snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: "Medicines & Healthcare Products",
+            itemListElement: (products || []).map((product, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              item: {
+                "@type": "Product",
+                name: product.name,
+                category: product.category || "Medicine",
+                offers: {
+                  "@type": "Offer",
+                  priceCurrency: "BDT",
+                  price: product.price,
+                  availability:
+                    Number(product.stock) > 0
+                      ? "https://schema.org/InStock"
+                      : "https://schema.org/OutOfStock",
+                  itemCondition: "https://schema.org/NewCondition",
+                },
+              },
+            })),
+          }),
+        }}
+      />
+
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header Hero Banner */}
